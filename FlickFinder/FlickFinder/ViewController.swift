@@ -36,7 +36,7 @@ class ViewController: UIViewController {
         let methodArguments: [String: String!] = [
             "method": METHOD_NAME,
             "api_key": API_KEY,
-            "text": "baby asian elephant",
+            "text": phraseTextField.text,
             "safe_search": SAFE_SEARCH,
             "extras": EXTRAS,
             "format": DATA_FORMAT,
