@@ -115,7 +115,44 @@ class ViewController: UIViewController {
                 print("Cannot find keys 'photos' in \(parsedResult)")
                 return
             }
-
+            
+            /* Determine the number of photos */
+            /* GUARD: Is "total" key in photosDictionary */
+            guard let totalPhotos = (photosDictionary["total"] as? NSString)?.integerValue else {
+                print("Cannot find keys 'total' in \(photosDictionary)")
+                return
+            }
+            
+            if totalPhotos > 0 {
+                
+                /* GUARD: Is "photo" key in photosDictionary */
+                guard let photosArray = photosDictionary["photo"] as? [[String: AnyObject]] else {
+                    print("Cannot find keys 'photo' in \(photosDictionary)")
+                    return
+                }
+                
+                let randomPhotoIndex = Int(arc4random_uniform(UInt32(photosArray.count)))
+                let photoDictionary = photosArray[randomPhotoIndex] as [String: AnyObject]
+                
+                /* Prepare the UI updates */
+                let photoTitle = photoDictionary["title"] as? String
+                guard let imageURLString = photoDictionary["url_m"] as? String else {
+                    print("No url_m key.. Fcking API..")
+                    return
+                }
+                
+                let imageURL = NSURL(string: imageURLString)
+                
+                if let imageData = NSData(contentsOfURL: imageURL!) {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.photoTitleLabel.text = photoTitle
+                        self.photoImageView.image = UIImage(data: imageData)
+                    })
+                } else {
+                    print("Image does not exist at \(imageURL)")
+                }
+                
+            }
         }
         
         task.resume()
