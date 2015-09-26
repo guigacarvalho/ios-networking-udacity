@@ -152,6 +152,14 @@ class ViewController: UIViewController {
                     print("Image does not exist at \(imageURL)")
                 }
                 
+            } else {
+                dispatch_async(dispatch_get_main_queue(), {
+                    print("No photos found, please try again?")
+                    self.photoTitleLabel.text = "No photos found"
+                    self.photoImageView.image = nil
+                    
+                    
+                })
             }
         }
         
