@@ -68,6 +68,11 @@ class ViewController: UIViewController {
             /* GUARD: Was there an error? */
             guard (error == nil) else {
                 print("There was an error with your request: \(error)")
+                dispatch_async(dispatch_get_main_queue(), {
+                    print("No photos found, please try again?")
+                    self.photoTitleLabel.text = "There was an error with your request.\n Are you offline?"
+                    self.photoImageView.image = nil
+                })
                 return
             }
             
