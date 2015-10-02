@@ -12,7 +12,7 @@ import UIKit
 
 let BASE_URL = "https://api.flickr.com/services/rest/"
 let METHOD_NAME = "flickr.photos.search"
-let API_KEY = "ENTER_YOUR_API_KEY_HERE"
+let API_KEY = "063c04acddf53186989318e3194c08f7"
 let EXTRAS = "url_m"
 let SAFE_SEARCH = "1"
 let DATA_FORMAT = "json"
@@ -56,8 +56,18 @@ class ViewController: UIViewController {
         
         /* Added from student request -- hides keyboard after searching */
         self.dismissAnyVisibleKeyboards()
+        print("test")
         
-        print("Will implement this function in a later step...")
+        let methodArguments: [String: String!] = [
+            "method": METHOD_NAME,
+            "api_key": API_KEY,
+            "safe_search": SAFE_SEARCH,
+            "bbox": generateBboxFrom(latitudeTextField.text!,lon: longitudeTextField.text!),
+            "extras": EXTRAS,
+            "format": DATA_FORMAT,
+            "nojsoncallback": NO_JSON_CALLBACK
+        ]
+        getImageFromFlickrBySearch(methodArguments)
     }
     
     // MARK: Life Cycle
@@ -260,6 +270,22 @@ class ViewController: UIViewController {
         }
         
         return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+    }
+    
+    // MARK: Convert lat lon in Bbox
+    
+    func generateBboxFrom(lat:String, lon:String) -> String {
+        //TODO: Validate Lat/Lon parameters
+        let latitude = (lat as? NSString)?.integerValue
+        let longitude = (lon as? NSString)?.integerValue
+        let range = 1
+        let upperLatitude = latitude! + range
+        let lowerLatitude = latitude! - range
+        let easternLongitude = longitude! + range
+        let westernLongitude = longitude! - range
+        print("test")
+        return "\(upperLatitude),\(lowerLatitude),\(easternLongitude),\(westernLongitude)"
+        
     }
 }
 
