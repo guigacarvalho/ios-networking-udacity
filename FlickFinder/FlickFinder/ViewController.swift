@@ -56,7 +56,6 @@ class ViewController: UIViewController {
         
         /* Added from student request -- hides keyboard after searching */
         self.dismissAnyVisibleKeyboards()
-        print("test")
         
         let methodArguments: [String: String!] = [
             "method": METHOD_NAME,
@@ -278,14 +277,57 @@ class ViewController: UIViewController {
         //TODO: Validate Lat/Lon parameters
         let latitude = (lat as? NSString)?.integerValue
         let longitude = (lon as? NSString)?.integerValue
-        let range = 1
-        let upperLatitude = latitude! + range
-        let lowerLatitude = latitude! - range
-        let easternLongitude = longitude! + range
-        let westernLongitude = longitude! - range
-        print("test")
-        return "\(upperLatitude),\(lowerLatitude),\(easternLongitude),\(westernLongitude)"
+        var success:Bool
+        var errorMsg:String
+        (success, errorMsg) = validateInputs(latitude!, lon: longitude!)
         
+        if (success) {
+            let range = 1
+            let upperLatitude = latitude! + range
+            let lowerLatitude = latitude! - range
+            let easternLongitude = longitude! + range
+            let westernLongitude = longitude! - range
+            return "\(upperLatitude),\(lowerLatitude),\(easternLongitude),\(westernLongitude)"
+        }
+        else {
+            self.photoTitleLabel.text = errorMsg
+            return ""
+        }
+    }
+    
+    func validateInputs(lat:Int,lon:Int) -> (success:Bool, errorMesg:String) {
+        let latError = "Please insert latitudes between [-90, 90]."
+        let lonError = "Please insert longitudes between [-180, 180]."
+        var errorMsg = ""
+        var success:Bool = true
+        
+        if validateLats(lat) {
+            errorMsg += latError
+            success = false
+        }
+        if validateLons(lon) {
+            errorMsg += lonError
+            success = false
+        }
+    
+        return (success, errorMsg)
+    }
+    func validateLats(lat:Int) -> Bool {
+        if (lat < -90 || lat > 90) {
+            return false
+        }
+        else {
+            return true
+        }
+    }
+    
+    func validateLons(lon:Int) -> Bool {
+        if (lon < -180 || lon > 180) {
+            return false
+        }
+        else {
+            return true
+        }
     }
 }
 
