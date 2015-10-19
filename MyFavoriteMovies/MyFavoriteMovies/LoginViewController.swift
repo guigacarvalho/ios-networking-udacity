@@ -101,11 +101,11 @@ class LoginViewController: UIViewController {
         
         /* 1. Set the parameters */
         let methodParameters = [
-            "key": "value"
+            "api_key": appDelegate.apiKey
         ]
         
         /* 2. Build the URL */
-        let urlString = "BUILD_THE_URL" + appDelegate.escapedParameters(methodParameters)
+        let urlString = appDelegate.baseURLString + "/authentication/token/new" + appDelegate.escapedParameters(methodParameters)
         let url = NSURL(string: urlString)!
         
         /* 3. Configure the request */
@@ -117,7 +117,7 @@ class LoginViewController: UIViewController {
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                print("getRequestToken: Print an error message")
+                print("getRequestToken: \(error)")
                 return
             }
             
@@ -140,10 +140,24 @@ class LoginViewController: UIViewController {
             }
             
             /* 5. Parse the data */
-            print("getRequestToken: Parse the data \(data)")
+            //print("getRequestToken: Parse the data \(data)")
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            } catch {
+                parsedResult = nil
+                dispatch_async(dispatch_get_main_queue(), {
+                    print("Update UI thread")
+                })
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+
             
             /* 6. Use the data! */
-            print("getRequestToken: Use the data")
+            //print("getRequestToken: Use the data:\n\(parsedResult)")
+            self.appDelegate.requestToken = parsedResult["request_token"] as? String
+            print(self.appDelegate.requestToken)
         }
         
         /* 7. Start the request */
