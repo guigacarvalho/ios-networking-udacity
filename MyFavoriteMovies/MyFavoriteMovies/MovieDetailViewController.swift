@@ -199,16 +199,80 @@ class MovieDetailViewController: UIViewController {
     
     @IBAction func unFavoriteButtonTouchUpInside(sender: AnyObject) {
         
-        print("unFavoriteButtonTouchUpInside: implement me!")
-        
         /* TASK: Remove movie as favorite, then update favorite buttons */
-        /* 1. Set the parameters */
-        /* 2. Build the URL */
-        /* 3. Configure the request */
-        /* 4. Make the request */
-        /* 5. Parse the data */
-        /* 6. Use the data! */
-        /* 7. Start the request */
+        /* TASK A: Get favorite movies, then update the favorite buttons */
+        /* 1A. Set the parameters */
+        let methodParameters = [
+            "api_key": appDelegate.apiKey,
+            "session_id": appDelegate.sessionID!
+        ]
+        
+        /* 2A. Build the URL */
+        let urlString = appDelegate.baseURLSecureString + "account/\(appDelegate.userID!)/favorite" + appDelegate.escapedParameters(methodParameters)
+        let url = NSURL(string: urlString)!
+        
+        /* 3A. Configure the request */
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.HTTPBody = "{\n  \"media_type\": \"movie\",\n  \"media_id\": \(movie!.id),\n  \"favorite\": false\n}".dataUsingEncoding(NSUTF8StringEncoding);
+        
+        /* 4A. Make the request */
+        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+            
+            /* GUARD: Was there an error? */
+            guard (error == nil) else {
+                print("There was an error with your request: \(error)")
+                return
+            }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)! \n \(response)")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                print("No data was returned by the request!")
+                return
+            }
+            
+            /* 5A. Parse the data */
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            } catch {
+                parsedResult = nil
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            /* GUARD: Is the "results" key in parsedResult? */
+            guard let results = parsedResult["status_code"] as? Int else {
+                print("Cannot find key 'status_code' in \(parsedResult)")
+                return
+            }
+            
+            /* 6A. Use the data! */
+            dispatch_async(dispatch_get_main_queue()) {
+                if (results == 13) {
+                    self.favoriteButton.hidden = false
+                    self.unFavoriteButton.hidden = true
+                }
+            }
+        }
+        
+        /* 7A. Start the request */
+        task.resume()
     }
     
     @IBAction func favoriteButtonTouchUpInside(sender: AnyObject) {
@@ -216,12 +280,80 @@ class MovieDetailViewController: UIViewController {
         print("favoriteButtonTouchUpInside: implement me!")
         
         /* TASK: Add movie as favorite, then update favorite buttons */
-        /* 1. Set the parameters */
-        /* 2. Build the URL */
-        /* 3. Configure the request */
-        /* 4. Make the request */
-        /* 5. Parse the data */
-        /* 6. Use the data! */
-        /* 7. Start the request */
-    }
+        
+        /* TASK: Remove movie as favorite, then update favorite buttons */
+        /* TASK A: Get favorite movies, then update the favorite buttons */
+        /* 1A. Set the parameters */
+        let methodParameters = [
+            "api_key": appDelegate.apiKey,
+            "session_id": appDelegate.sessionID!
+        ]
+        
+        /* 2A. Build the URL */
+        let urlString = appDelegate.baseURLSecureString + "account/\(appDelegate.userID!)/favorite" + appDelegate.escapedParameters(methodParameters)
+        let url = NSURL(string: urlString)!
+        
+        /* 3A. Configure the request */
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.HTTPBody = "{\n  \"media_type\": \"movie\",\n  \"media_id\": \(movie!.id),\n  \"favorite\": true\n}".dataUsingEncoding(NSUTF8StringEncoding);
+        
+        /* 4A. Make the request */
+        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+            
+            /* GUARD: Was there an error? */
+            guard (error == nil) else {
+                print("There was an error with your request: \(error)")
+                return
+            }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)! \n \(response)")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                print("No data was returned by the request!")
+                return
+            }
+            
+            /* 5A. Parse the data */
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            } catch {
+                parsedResult = nil
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            /* GUARD: Is the "results" key in parsedResult? */
+            guard let results = parsedResult["status_code"] as? Int else {
+                print("Cannot find key 'status_code' in \(parsedResult)")
+                return
+            }
+            
+            /* 6A. Use the data! */
+            dispatch_async(dispatch_get_main_queue()) {
+                if (results == 1 || results == 12) {
+                    print(results)
+                    self.favoriteButton.hidden = true
+                    self.unFavoriteButton.hidden = false
+                }
+            }
+        }
+        
+        /* 7A. Start the request */
+        task.resume()    }
 }
