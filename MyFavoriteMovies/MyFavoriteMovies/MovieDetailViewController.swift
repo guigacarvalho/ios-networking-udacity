@@ -22,7 +22,7 @@ class MovieDetailViewController: UIViewController {
 
     var appDelegate: AppDelegate!
     var session: NSURLSession!
-    
+    var movies: [Movie] = [Movie]()
     var movie: Movie?
     
     // MARK: Life Cycle
@@ -51,14 +51,88 @@ class MovieDetailViewController: UIViewController {
             unFavoriteButton.hidden = true
             
             /* TASK A: Get favorite movies, then update the favorite buttons */
-            /* 1A. Set the parameters */
-            /* 2A. Build the URL */
-            /* 3A. Configure the request */
-            /* 4A. Make the request */
-            /* 5A. Parse the data */
-            /* 6A. Use the data! */
-            /* 7A. Start the request */
-        
+            /* 1. Set the parameters */
+            let methodParameter = [
+                "api_key": appDelegate.apiKey,
+                "session_id": appDelegate.sessionID!
+            ]
+            
+            /* 2. Build the URL */
+            let urlString = appDelegate.baseURLSecureString + "account/\(appDelegate.userID)/favorite/movies" + appDelegate.escapedParameters(methodParameter)
+//            print(urlString)
+            let url = NSURL(string: urlString)!
+            
+            /* 3. Configure the request */
+            let request = NSMutableURLRequest(URL: url)
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+            
+            /* 4. Make the request */
+            let task = session.dataTaskWithRequest(request) { (data, response, error) in
+                
+                /* GUARD: Was there an error? */
+                guard (error == nil) else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        print("Getting favorite movies failed.")
+                    }
+                    print("There was an error with your request: \(error)")
+                    return
+                }
+                
+                /* GUARD: Did we get a successful 2XX response? */
+                guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                    if let response = response as? NSHTTPURLResponse {
+                        print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                    } else if let response = response {
+                        print("Your request returned an invalid response! Response: \(response)!")
+                    } else {
+                        print("Your request returned an invalid response!")
+                    }
+                    return
+                }
+                
+                /* GUARD: Was there any data returned? */
+                guard let data = data else {
+                    print("No data was returned by the request!")
+                    return
+                }
+                
+                /* Parse the data! */
+                let parsedResult: AnyObject!
+                do {
+                    parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments) as! NSDictionary
+                } catch {
+                    parsedResult = nil
+                    print("Could not parse the data as JSON: '\(data)'")
+                    return
+                }
+                var isFavorite:Bool = false
+
+                if let results = parsedResult["results"] as? [[String : AnyObject]] {
+                    print(results)
+                    self.movies = Movie.moviesFromResults(results)
+                    for movie in self.movies {
+                        if movie.id == self.movie!.id {
+                            isFavorite = true
+                        }
+                    }
+                    dispatch_async(dispatch_get_main_queue(), {
+                        if isFavorite == true {
+                            self.unFavoriteButton.hidden = false
+                            self.favoriteButton.hidden = true
+                        } else {
+                            self.unFavoriteButton.hidden = true
+                            self.favoriteButton.hidden = false
+                        }
+                    })
+                }
+                
+                /* 6. Use the data! */
+                
+            }
+            
+            /* 7. Start the request */
+            task.resume()
+            
             /* TASK B: Get the poster image, then populate the image view */
             if let posterPath = movie.posterPath {
                 
