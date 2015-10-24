@@ -10,7 +10,7 @@ import UIKit
 
 // MARK: - TMDBAuthViewController: UIViewController
 
-class TMDBAuthViewController: UIViewController {
+class TMDBAuthViewController: UIViewController, UIWebViewDelegate {
 
     // MARK: Properties
     
@@ -45,10 +45,15 @@ class TMDBAuthViewController: UIViewController {
     func cancelAuth() {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
-}
-
-// MARK: - TMDBAuthViewController: UIWebViewDelegate
-
-extension TMDBAuthViewController: UIWebViewDelegate {
     
+    func webViewDidFinishLoad(webView: UIWebView) {
+        print(webView.request!.URL!.absoluteString )
+        print("\(TMDBClient.Constants.AuthorizationURL)\(requestToken!)/allow")
+        if (webView.request!.URL!.absoluteString == "\(TMDBClient.Constants.AuthorizationURL)\(requestToken!)/allow") {
+            self.dismissViewControllerAnimated(true, completion: { () -> Void in
+                self.completionHandler!(success: true, errorString: nil)
+            })
+        }
+    }
+
 }
